@@ -24,7 +24,7 @@
             <TaskItem
               :isComplete="task.isComplete"
               :task="task.task"
-              @check="updateCompletedStatus"
+              @check="updateCompletedStatus(task.id)"
               @delete="confirmDelete(task)"
             />
           </div>
@@ -110,12 +110,9 @@ export default {
   },
   data: () => ({
     newTask: "",
-    taskToDelete: {
-      id: null,
-      task: "",
-    },
+    currentFilter: "all",
+    taskToDelete: {},
     tasks: [],
-    displayedTasks: [],
     dialog: {
       delete: false,
     },
@@ -139,24 +136,19 @@ export default {
 
       localStorage.setItem("todo-list", JSON.stringify(this.tasks));
     },
-    updateCompletedStatus() {
+
+    updateCompletedStatus(id) {
+      this.tasks = this.tasks.map((task) => {
+        return task.id === id
+          ? { ...task, isComplete: !task.isComplete }
+          : task;
+      });
+
       localStorage.setItem("todo-list", JSON.stringify(this.tasks));
     },
 
     showTasks(action) {
-      switch (action) {
-        case "all":
-          this.displayedTasks = this.allTasks;
-          break;
-        case "active":
-          this.displayedTasks = this.activeTasks;
-          break;
-        case "completed":
-          this.displayedTasks = this.completedTasks;
-          break;
-        default:
-          this.displayedTasks = this.allTasks;
-      }
+      this.currentFilter = action;
     },
 
     clearCompletedTasks() {
@@ -170,20 +162,16 @@ export default {
     },
 
     confirmDelete(task) {
-      this.taskToDelete = {
-        id: task.id,
-        task: task.task,
-      };
+      this.taskToDelete = task;
       this.openDialog("delete");
     },
 
     deleteTask() {
-      let tasks = this.tasks.filter((task) => {
+      this.tasks = this.tasks.filter((task) => {
         return task.id !== this.taskToDelete.id;
       });
 
-      this.tasks = tasks;
-      this.displayedTasks = this.tasks;
+      this.currentFilter = "all";
       localStorage.setItem("todo-list", JSON.stringify(this.tasks));
 
       this.closeDialog("delete");
@@ -199,16 +187,30 @@ export default {
     },
 
     openSnackbar(type, message) {
-      this.snackbar[type].isOpen = true;
-      this.snackbar[type].message = message;
+      this.snackbar[type] = {
+        isOpen: true,
+        message: message,
+      };
     },
 
     closeSnackbar(type) {
-      this.snackbar[type].isOpen = false;
-      this.snackbar[type].message = "";
+      this.snackbar[type] = {
+        isOpen: false,
+        message: "",
+      };
     },
   },
   computed: {
+    displayedTasks() {
+      switch (this.currentFilter) {
+        case "active":
+          return this.tasks.filter((task) => !task.isComplete);
+        case "completed":
+          return this.tasks.filter((task) => task.isComplete);
+        default:
+          return this.tasks;
+      }
+    },
     incompleteTaskCount: function () {
       let count = this.tasks.filter((task) => {
         return task.isComplete === false;
@@ -223,7 +225,7 @@ export default {
 
     activeTasks: function () {
       let tasks = this.tasks.filter((task) => {
-        return task.isComplete === false;
+        return !task.isComplete;
       });
 
       return tasks;
@@ -231,7 +233,7 @@ export default {
 
     completedTasks: function () {
       let tasks = this.tasks.filter((task) => {
-        return task.isComplete === true;
+        return task.isComplete;
       });
 
       return tasks;
@@ -239,13 +241,11 @@ export default {
   },
   mounted() {
     const tasks = localStorage.getItem("todo-list");
-    if (JSON.parse(tasks) === null) {
+    if (!tasks) {
       this.tasks = [];
     } else {
       this.tasks = JSON.parse(tasks);
     }
-
-    this.displayedTasks = this.tasks;
   },
 };
 </script>

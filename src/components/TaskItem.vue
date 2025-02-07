@@ -3,12 +3,12 @@
     <v-hover v-slot="{ hover }">
       <div class="todo-task">
         <v-checkbox
-          v-model="isComplete"
+          v-model="val"
           @click="clickCheckbox"
           class="px-4 py-1"
           dark
         />
-        <p :class="isComplete ? 'todo-task-selected' : 'todo-task-default'">
+        <p :class="val ? 'todo-task-selected' : 'todo-task-default'">
           {{ task }}
         </p>
 
@@ -38,7 +38,9 @@ export default {
     isComplete: Boolean,
     task: String,
   },
-  data: () => ({}),
+  data: () => ({
+    val: false,
+  }),
   methods: {
     clickCheckbox() {
       this.$emit("check");
@@ -48,7 +50,9 @@ export default {
     },
   },
   computed: {},
-  mounted() {},
+  mounted() {
+    this.val = this.isComplete;
+  },
 };
 </script>
 

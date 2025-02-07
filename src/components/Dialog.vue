@@ -5,7 +5,7 @@
       <v-card-actions>
         <v-btn color="green darken-1" text @click="closeDialog"> Close </v-btn>
         <v-spacer></v-spacer>
-        <v-btn color="red darken-1" text @click="agreeFunc"> Agree </v-btn>
+        <v-btn color="red darken-1" text @click="agreeFn"> Agree </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -23,7 +23,7 @@ export default {
     closeDialog() {
       return this.$emit("toggle");
     },
-    agreeFunc() {
+    agreeFn() {
       return this.$emit("agree");
     },
   },
