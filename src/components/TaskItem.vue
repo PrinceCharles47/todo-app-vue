@@ -3,27 +3,42 @@
     <v-hover v-slot="{ hover }">
       <div class="todo-task">
         <v-checkbox
-          v-model="val"
+          v-model="task.isComplete"
           @click="clickCheckbox"
           class="px-4 py-1"
           dark
         />
-        <p :class="val ? 'todo-task-selected' : 'todo-task-default'">
-          {{ task }}
+        <p
+          :class="task.isComplete ? 'todo-task-selected' : 'todo-task-default'"
+        >
+          {{ task.task }}
         </p>
 
-        <v-btn
-          v-if="hover"
-          class="ml-auto mr-3"
-          fab
-          plain
-          dark
-          small
-          color="pink"
-          @click="deleteTask"
-        >
-          <v-icon dark> mdi-close </v-icon>
-        </v-btn>
+        <div class="ml-auto">
+          <v-btn
+            v-if="hover"
+            class="ml-auto"
+            fab
+            plain
+            dark
+            small
+            @click="redirect('task', task.id)"
+          >
+            <v-icon dark> mdi-eye-outline </v-icon>
+          </v-btn>
+          <v-btn
+            v-if="hover"
+            class="ml-auto mr-3"
+            fab
+            plain
+            dark
+            small
+            color="pink"
+            @click="deleteTask"
+          >
+            <v-icon dark> mdi-close </v-icon>
+          </v-btn>
+        </div>
       </div>
     </v-hover>
     <v-divider dark />
@@ -35,13 +50,18 @@ export default {
   name: "TaskItem",
 
   props: {
-    isComplete: Boolean,
-    task: String,
+    taskDetails: Object,
   },
   data: () => ({
-    val: false,
+    task: {},
   }),
   methods: {
+    redirect(routeName, taskId) {
+      return this.$router.push({
+        name: routeName,
+        params: { id: taskId },
+      });
+    },
     clickCheckbox() {
       this.$emit("check");
     },
@@ -51,7 +71,7 @@ export default {
   },
   computed: {},
   mounted() {
-    this.val = this.isComplete;
+    this.task = this.taskDetails;
   },
 };
 </script>

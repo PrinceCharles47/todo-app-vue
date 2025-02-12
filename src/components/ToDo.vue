@@ -7,7 +7,7 @@
           <v-text-field
             v-model="newTask"
             class="todo-input"
-            prepend-icon="mdi-emoticon-happy"
+            prepend-icon="mdi-plus"
             rounded
             label="Create a new todo..."
             type="text"
@@ -22,9 +22,8 @@
           <!-- checkbox -->
           <div v-for="task in displayedTasks" :key="task.id">
             <TaskItem
-              :isComplete="task.isComplete"
-              :task="task.task"
-              @check="updateCompletedStatus(task.id)"
+              :taskDetails="task"
+              @check="updateCompletedStatus()"
               @delete="confirmDelete(task)"
             />
           </div>
@@ -38,7 +37,7 @@
               }}
             </p>
             <div class="todo-filters-buttons">
-              <div>
+              <div v-if="!isMobile">
                 <v-btn
                   text
                   x-small
@@ -76,6 +75,27 @@
           </div>
         </div>
 
+        <div v-if="isMobile" class="todo-filters-mobile">
+          <v-btn text x-small dark color="primary" @click="showTasks('all')"
+            >All</v-btn
+          >
+          <v-btn
+            text
+            x-small
+            dark
+            color="rgb(161, 161, 161)"
+            @click="showTasks('active')"
+            >Active</v-btn
+          >
+          <v-btn
+            text
+            x-small
+            dark
+            color="rgb(161, 161, 161)"
+            @click="showTasks('completed')"
+            >Completed</v-btn
+          >
+        </div>
         <!-- delete task dialog -->
         <Dialog
           :open="dialog.delete"
@@ -126,10 +146,13 @@ export default {
   }),
   methods: {
     createTask() {
+      if (!this.newTask) return;
+
       this.tasks.push({
         id: Math.floor(Math.random() * 10000),
         task: this.newTask,
         isComplete: false,
+        subtasks: [],
       });
 
       this.newTask = "";
@@ -137,13 +160,7 @@ export default {
       localStorage.setItem("todo-list", JSON.stringify(this.tasks));
     },
 
-    updateCompletedStatus(id) {
-      this.tasks = this.tasks.map((task) => {
-        return task.id === id
-          ? { ...task, isComplete: !task.isComplete }
-          : task;
-      });
-
+    updateCompletedStatus() {
       localStorage.setItem("todo-list", JSON.stringify(this.tasks));
     },
 
@@ -157,7 +174,7 @@ export default {
       });
 
       this.tasks = tasks;
-      this.displayedTasks = this.tasks;
+      this.currentFilter = "all";
       localStorage.setItem("todo-list", JSON.stringify(this.tasks));
     },
 
@@ -238,6 +255,9 @@ export default {
 
       return tasks;
     },
+    isMobile: function () {
+      return this.$vuetify.breakpoint.mobile;
+    },
   },
   mounted() {
     const tasks = localStorage.getItem("todo-list");
@@ -262,7 +282,9 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  min-width: 500px;
+  min-width: 300px;
+  max-width: 500px;
+  width: 50%;
   position: absolute;
   left: 50%;
   margin-top: 5rem;
@@ -291,6 +313,15 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 10px 15px;
+}
+
+.todo-filters-mobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(54, 54, 87);
+  padding: 10px;
+  border-radius: 2.5px;
 }
 
 .todo-filters p {
