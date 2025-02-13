@@ -8,11 +8,18 @@
           class="px-4 py-1"
           dark
         />
-        <p
-          :class="task.isComplete ? 'todo-task-selected' : 'todo-task-default'"
-        >
-          {{ task.task }}
-        </p>
+        <div>
+          <p
+            :class="
+              task.isComplete ? 'todo-task-selected' : 'todo-task-default'
+            "
+          >
+            {{ task.task }}
+          </p>
+          <p class="task-left">
+            {{ task.subtasks ? checkSubtaskCount(task.subtasks) : null }}
+          </p>
+        </div>
 
         <div class="ml-auto">
           <v-btn
@@ -68,6 +75,16 @@ export default {
     deleteTask() {
       this.$emit("delete");
     },
+    checkSubtaskCount(subtasks) {
+      if (subtasks.length > 0) {
+        let count = subtasks.filter((subtask) => {
+          return !subtask.isComplete;
+        });
+
+        return `${count.length} of ${subtasks.length} items left`;
+      }
+      return null;
+    },
   },
   computed: {},
   mounted() {
@@ -91,6 +108,12 @@ export default {
 .todo-task-selected {
   text-decoration: line-through;
   margin-bottom: 5px;
+  color: rgb(161, 161, 161);
+}
+
+.task-left {
+  margin: 0;
+  font-size: 0.75rem;
   color: rgb(161, 161, 161);
 }
 </style>
